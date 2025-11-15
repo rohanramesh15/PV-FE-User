@@ -1,5 +1,6 @@
 import { Box, Button, Container, Heading, Stack, Text } from '@chakra-ui/react'
 import { useState } from 'react'
+import CameraFeed from './CameraFeed';
 
 const API_BASE_URL = 'https://pv-be-q7m9.onrender.com/api'
 
@@ -43,6 +44,8 @@ function App() {
         <Heading size="2xl" textAlign="center">
           Team Score Controller
         </Heading>
+             
+        <CameraFeed />
 
         <Stack direction="row" gap={10}>
           {/* Team 1 */}
