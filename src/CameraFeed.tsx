@@ -1,16 +1,18 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 
 const SimpleCamera = () => {
-  const videoRef = useRef(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
+    let stream: MediaStream | null = null;
+
     const startCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
+        stream = await navigator.mediaDevices.getUserMedia({
           video: true,
-          audio: false 
+          audio: false
         });
-        
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -23,8 +25,8 @@ const SimpleCamera = () => {
 
     // Cleanup function
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      if (stream) {
+        stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
       }
     };
   }, []);
