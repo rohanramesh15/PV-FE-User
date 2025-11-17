@@ -1,6 +1,8 @@
 import { Box, Button, Container, Heading, Stack, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 import CameraFeed from './CameraFeed';
+import { Camera, Upload, CheckCircle, XCircle, Loader2, Monitor } from 'lucide-react';
+
 
 const API_BASE_URL = 'https://pv-be-q7m9.onrender.com/api'
 
@@ -12,7 +14,108 @@ interface Scores {
 function App() {
   const [scores, setScores] = useState<Scores>({ team1: 0, team2: 0 })
   const [loading, setLoading] = useState<string | null>(null)
+  const [screenshot, setScreenshot] = useState(null);
+  const [capturing, setCapturing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadResponse, setUploadResponse] = useState(null);
+  const [error, setError] = useState(null);
 
+
+
+  const dataURLtoBlob = (dataUrl) => {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  };
+
+  const takeScreenshot = async () => {
+    setCapturing(true);
+    setError(null);
+    setUploadResponse(null);
+
+    try {
+      // Load html2canvas from CDN
+      if (!window.html2canvas) {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        await new Promise((resolve, reject) => {
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      // Capture the entire document body
+      const canvas = await window.html2canvas(document.body, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        scale: 2, // Higher quality
+        logging: false
+      });
+
+      // Convert canvas to data URL
+      const imageDataUrl = canvas.toDataURL('image/png');
+
+      try {
+        const blob = dataURLtoBlob(imageDataUrl);
+
+        const formData = new FormData();
+        const timestamp = Date.now();
+        formData.append('image', blob, `screenshot-${timestamp}.png`);
+        formData.append('description', `Screenshot captured at ${new Date().toLocaleString()}`);
+
+        const response = await fetch('http://localhost:5000/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setUploadResponse(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Upload failed');
+        console.error('Upload error:', err);
+      } finally {
+        setUploading(false);
+      }
+
+
+
+    } catch (err) {
+      setError('Failed to capture screenshot: ' + err.message);
+      console.error('Screenshot error:', err);
+    } finally {
+      setCapturing(false);
+    }
+  };
+
+  const uploadScreenshot = async () => {
+    if (!screenshot) return;
+
+    setUploading(true);
+    setError(null);
+
+
+  };
+
+  const clearScreenshot = () => {
+    setScreenshot(null);
+    setUploadResponse(null);
+    setError(null);
+  };
+
+
+  /*
   const incrementScore = async (team: 'team1' | 'team2') => {
     setLoading(team)
     try {
@@ -36,7 +139,7 @@ function App() {
     } finally {
       setLoading(null)
     }
-  }
+  } */
 
   return (
     <Container maxW="container.xl" py={10}>
@@ -44,66 +147,18 @@ function App() {
         <Heading size="2xl" textAlign="center">
           Team Score Controller
         </Heading>
-             
+
         <CameraFeed />
+        <Button
+          colorScheme="blue"
+          size="lg"
+          onClick={() => takeScreenshot()}
+          disabled={loading === 'team1'}
+          width="full"
+        >
+          {loading === 'team1' ? 'Cheering...' : 'Send Cheers'}
+        </Button>
 
-        <Stack direction="row" gap={10}>
-          {/* Team 1 */}
-          <Box
-            p={8}
-            borderWidth="2px"
-            borderRadius="lg"
-            borderColor="blue.400"
-            bg="blue.50"
-            minW="300px"
-          >
-            <Stack gap={4}>
-              <Heading size="lg" color="blue.600">
-                Team 1
-              </Heading>
-              <Text fontSize="4xl" fontWeight="bold" color="blue.700">
-                {scores.team1}
-              </Text>
-              <Button
-                colorScheme="blue"
-                size="lg"
-                onClick={() => incrementScore('team1')}
-                disabled={loading === 'team1'}
-                width="full"
-              >
-                {loading === 'team1' ? 'Adding...' : '+ Add Point'}
-              </Button>
-            </Stack>
-          </Box>
-
-          {/* Team 2 */}
-          <Box
-            p={8}
-            borderWidth="2px"
-            borderRadius="lg"
-            borderColor="red.400"
-            bg="red.50"
-            minW="300px"
-          >
-            <Stack gap={4}>
-              <Heading size="lg" color="red.600">
-                Team 2
-              </Heading>
-              <Text fontSize="4xl" fontWeight="bold" color="red.700">
-                {scores.team2}
-              </Text>
-              <Button
-                colorScheme="red"
-                size="lg"
-                onClick={() => incrementScore('team2')}
-                disabled={loading === 'team2'}
-                width="full"
-              >
-                {loading === 'team2' ? 'Adding...' : '+ Add Point'}
-              </Button>
-            </Stack>
-          </Box>
-        </Stack>
       </Stack>
     </Container>
   )
