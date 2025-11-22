@@ -1,14 +1,7 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Camera, Download, RotateCcw } from 'lucide-react';
-import { Box, Button, Container, Heading, Stack, Text } from '@chakra-ui/react'
-
-
+import { useRef, useEffect } from 'react';
 
 const CameraFeed = () => {
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const [stream, setStream] = useState(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   
 
   useEffect(() => {
@@ -38,30 +31,6 @@ const CameraFeed = () => {
       }
     };
   }, []);
-
-
-
-
-  const takePicture = () => {
-    if (!videoRef.current || !canvasRef.current) return;
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw the current video frame to canvas
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Convert canvas to image data URL
-    const imageDataUrl = canvas.toDataURL('image/png');
-    setCapturedImage(imageDataUrl);
-
-    
-  };
 
   return (
     <div style={{ 

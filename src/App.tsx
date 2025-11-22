@@ -1,30 +1,27 @@
 import { Box, Button, Container, Heading, Stack, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 import CameraFeed from './CameraFeed';
-import { Camera, Upload, CheckCircle, XCircle, Loader2, Monitor } from 'lucide-react';
 
-
-const API_BASE_URL = 'https://pv-be-q7m9.onrender.com/api'
-
-interface Scores {
-  team1: number
-  team2: number
+// Type declaration for html2canvas
+declare global {
+  interface Window {
+    html2canvas: (element: HTMLElement, options?: Record<string, unknown>) => Promise<HTMLCanvasElement>;
+  }
 }
 
+const API_BASE_URL = 'https://pv-be-q7m9.onrender.com/api'
+//http://127.0.0.1:5000
+
 function App() {
-  const [scores, setScores] = useState<Scores>({ team1: 0, team2: 0 })
-  const [loading, setLoading] = useState<string | null>(null)
-  const [screenshot, setScreenshot] = useState(null);
   const [capturing, setCapturing] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadResponse, setUploadResponse] = useState(null);
-  const [error, setError] = useState(null);
+  const [uploadResponse, setUploadResponse] = useState<Record<string, unknown> | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
 
 
-  const dataURLtoBlob = (dataUrl) => {
+  const dataURLtoBlob = (dataUrl: string) => {
     const arr = dataUrl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
+    const mime = arr[0].match(/:(.*?);/)?.[1];
     const bstr = atob(arr[1]);
     let n = bstr.length;
     const u8arr = new Uint8Array(n);
@@ -71,11 +68,12 @@ function App() {
         formData.append('image', blob, `screenshot-${timestamp}.png`);
         formData.append('description', `Screenshot captured at ${new Date().toLocaleString()}`);
 
-        const response = await fetch('http://localhost:5000/upload', {
+        const response = await fetch(`${API_BASE_URL}/upload`, {
           method: 'POST',
           body: formData,
         });
 
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -85,35 +83,17 @@ function App() {
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Upload failed');
         console.error('Upload error:', err);
-      } finally {
-        setUploading(false);
       }
 
 
 
     } catch (err) {
-      setError('Failed to capture screenshot: ' + err.message);
+      setError('Failed to capture screenshot: ' + (err instanceof Error ? err.message : 'Unknown error'));
       console.error('Screenshot error:', err);
     } finally {
       setCapturing(false);
     }
   };
-
-  const uploadScreenshot = async () => {
-    if (!screenshot) return;
-
-    setUploading(true);
-    setError(null);
-
-
-  };
-
-  const clearScreenshot = () => {
-    setScreenshot(null);
-    setUploadResponse(null);
-    setError(null);
-  };
-
 
   /*
   const incrementScore = async (team: 'team1' | 'team2') => {
@@ -149,14 +129,27 @@ function App() {
         </Heading>
 
         <CameraFeed />
+
+        {error && (
+          <Box bg="red.100" p={4} borderRadius="md" borderWidth={1} borderColor="red.500">
+            <Text color="red.800">{error}</Text>
+          </Box>
+        )}
+
+        {uploadResponse && (
+          <Box bg="green.100" p={4} borderRadius="md" borderWidth={1} borderColor="green.500">
+            <Text color="green.800">Screenshot uploaded successfully!</Text>
+          </Box>
+        )}
+
         <Button
           colorScheme="blue"
           size="lg"
           onClick={() => takeScreenshot()}
-          disabled={loading === 'team1'}
+          disabled={capturing}
           width="full"
         >
-          {loading === 'team1' ? 'Cheering...' : 'Send Cheers'}
+          {capturing ? 'Capturing...' : 'Send Cheers'}
         </Button>
 
       </Stack>
