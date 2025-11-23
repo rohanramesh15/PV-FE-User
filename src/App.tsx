@@ -1,4 +1,4 @@
-import { Box, Button, Container, Heading, Stack, Text } from '@chakra-ui/react'
+import { Box, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 import CameraFeed from './CameraFeed';
 
@@ -9,15 +9,41 @@ declare global {
   }
 }
 
-const API_BASE_URL = 'https://pv-be-q7m9.onrender.com/api'
+const API_BASE_URL = "https://lazy-friends-travel.loca.lt/api"
+//'https://pv-be-q7m9.onrender.com/api'
 //http://127.0.0.1:5000
 
 function App() {
   const [capturing, setCapturing] = useState(false);
   const [uploadResponse, setUploadResponse] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
 
+
+  // Minimum swipe distance (in px) to trigger action
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isUpSwipe = distance > minSwipeDistance;
+
+    if (isUpSwipe && !capturing) {
+      takeScreenshot();
+    }
+  };
 
   const dataURLtoBlob = (dataUrl: string) => {
     const arr = dataUrl.split(',');
@@ -122,38 +148,85 @@ function App() {
   } */
 
   return (
-    <Container maxW="container.xl" py={10}>
-      <Stack gap={8}>
-        <Heading size="2xl" textAlign="center">
-          Team Score Controller
-        </Heading>
+    <Box
+      position="relative"
+      width="100vw"
+      height="100vh"
+      overflow="hidden"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      <CameraFeed />
 
-        <CameraFeed />
-
-        {error && (
-          <Box bg="red.100" p={4} borderRadius="md" borderWidth={1} borderColor="red.500">
-            <Text color="red.800">{error}</Text>
-          </Box>
-        )}
-
-        {uploadResponse && (
-          <Box bg="green.100" p={4} borderRadius="md" borderWidth={1} borderColor="green.500">
-            <Text color="green.800">Screenshot uploaded successfully!</Text>
-          </Box>
-        )}
-
-        <Button
-          colorScheme="blue"
-          size="lg"
-          onClick={() => takeScreenshot()}
-          disabled={capturing}
-          width="full"
+      {/* Error message */}
+      {error && (
+        <Box
+          position="absolute"
+          top={4}
+          left={4}
+          right={4}
+          bg="red.100"
+          p={4}
+          borderRadius="md"
+          borderWidth={1}
+          borderColor="red.500"
+          zIndex={10}
         >
-          {capturing ? 'Capturing...' : 'Send Cheers'}
-        </Button>
+          <Text color="red.800">{error}</Text>
+        </Box>
+      )}
 
-      </Stack>
-    </Container>
+      {/* Success message */}
+      {uploadResponse && (
+        <Box
+          position="absolute"
+          top={4}
+          left={4}
+          right={4}
+          bg="green.100"
+          p={4}
+          borderRadius="md"
+          borderWidth={1}
+          borderColor="green.500"
+          zIndex={10}
+        >
+          <Text color="green.800">Screenshot uploaded successfully!</Text>
+        </Box>
+      )}
+
+      {/* Swipe up indicator */}
+      {!capturing && (
+        <Box
+          position="absolute"
+          bottom={8}
+          left="50%"
+          transform="translateX(-50%)"
+          zIndex={10}
+          textAlign="center"
+        >
+          <Text color="white" fontSize="lg" fontWeight="bold" textShadow="0 2px 4px rgba(0,0,0,0.5)">
+            ↑ Swipe Up to Send Cheers
+          </Text>
+        </Box>
+      )}
+
+      {/* Capturing indicator */}
+      {capturing && (
+        <Box
+          position="absolute"
+          bottom={8}
+          left="50%"
+          transform="translateX(-50%)"
+          zIndex={10}
+          textAlign="center"
+        >
+          <Text color="white" fontSize="lg" fontWeight="bold" textShadow="0 2px 4px rgba(0,0,0,0.5)">
+            Capturing...
+          </Text>
+        </Box>
+      )}
+    </Box>
   )
 }
 
