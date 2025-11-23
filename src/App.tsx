@@ -1,4 +1,4 @@
-import { Box, Text } from '@chakra-ui/react'
+import { Box, Button, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 import CameraFeed from './CameraFeed';
 
@@ -195,37 +195,44 @@ function App() {
         </Box>
       )}
 
-      {/* Swipe up indicator */}
-      {!capturing && (
-        <Box
-          position="absolute"
-          bottom={8}
-          left="50%"
-          transform="translateX(-50%)"
-          zIndex={10}
-          textAlign="center"
-        >
-          <Text color="white" fontSize="lg" fontWeight="bold" textShadow="0 2px 4px rgba(0,0,0,0.5)">
-            ↑ Swipe Up to Send Cheers
+      {/* Bottom UI */}
+      <Box
+        position="absolute"
+        bottom={8}
+        left={4}
+        right={4}
+        zIndex={10}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        gap={3}
+      >
+        {/* Swipe up indicator */}
+        {!capturing && (
+          <Text color="white" fontSize="sm" fontWeight="bold" textShadow="0 2px 4px rgba(0,0,0,0.5)">
+            ↑ Swipe Up or Tap Button
           </Text>
-        </Box>
-      )}
+        )}
 
-      {/* Capturing indicator */}
-      {capturing && (
-        <Box
-          position="absolute"
-          bottom={8}
-          left="50%"
-          transform="translateX(-50%)"
-          zIndex={10}
-          textAlign="center"
-        >
+        {/* Capturing indicator */}
+        {capturing && (
           <Text color="white" fontSize="lg" fontWeight="bold" textShadow="0 2px 4px rgba(0,0,0,0.5)">
             Capturing...
           </Text>
-        </Box>
-      )}
+        )}
+
+        {/* Button */}
+        {!capturing && (
+          <Button
+            colorScheme="blue"
+            size="lg"
+            onClick={() => takeScreenshot()}
+            width="full"
+          >
+            Send Cheers
+          </Button>
+        )}
+      </Box>
     </Box>
   )
 }
