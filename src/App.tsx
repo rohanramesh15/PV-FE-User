@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-const API_BASE_URL = "https://28ba71031123.ngrok-free.app/api"
+const API_BASE_URL = "https://d173ae86c0fb.ngrok-free.app"
 //'https://pv-be-q7m9.onrender.com/api'
 //http://127.0.0.1:5000
 
