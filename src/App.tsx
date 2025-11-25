@@ -26,7 +26,7 @@ function App() {
 
   // Onboarding state
   const [showOnboarding, setShowOnboarding] = useState(true);
-  const [onboardingStep, setOnboardingStep] = useState(1);
+  const [onboardingStep, setOnboardingStep] = useState(0);
   const [practiceAnimating, setPracticeAnimating] = useState(false);
   const [practiceComplete, setPracticeComplete] = useState(false);
   const [showPracticeSuccess, setShowPracticeSuccess] = useState(false);
@@ -164,6 +164,105 @@ function App() {
         overflow="hidden"
       >
         <AnimatePresence mode="wait">
+          {/* Step 0: Welcome */}
+          {onboardingStep === 0 && (
+            <MotionBox
+              key="step0"
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              bottom={0}
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              px={6}
+              textAlign="center"
+              bg="linear-gradient(180deg, rgba(88, 28, 135, 0.3) 0%, rgba(15, 23, 42, 1) 50%, rgba(15, 23, 42, 1) 100%)"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Decorative glow */}
+              <Box
+                position="absolute"
+                top="-20%"
+                left="50%"
+                transform="translateX(-50%)"
+                w="300px"
+                h="300px"
+                bg="radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, transparent 70%)"
+                pointerEvents="none"
+              />
+
+              {/* Welcome text */}
+              <Text
+                color="purple.300"
+                fontSize="sm"
+                mb={4}
+                letterSpacing="widest"
+                textTransform="uppercase"
+                fontWeight="medium"
+              >
+                Welcome to
+              </Text>
+
+              {/* Title */}
+              <Text
+                color="white"
+                fontSize="5xl"
+                fontWeight="bold"
+                mb={2}
+                letterSpacing="tight"
+                lineHeight="1.1"
+              >
+                Dance
+              </Text>
+              <Text
+                color="white"
+                fontSize="5xl"
+                fontWeight="bold"
+                mb={16}
+                letterSpacing="tight"
+                lineHeight="1.1"
+              >
+                Battle
+              </Text>
+
+              {/* CTA Button */}
+              <Button
+                onClick={() => setOnboardingStep(1)}
+                px={14}
+                py={7}
+                fontSize="md"
+                fontWeight="semibold"
+                bg="white"
+                color="gray.900"
+                borderRadius="full"
+                boxShadow="0 4px 24px rgba(255, 255, 255, 0.2)"
+                _hover={{
+                  transform: "scale(1.02)",
+                  boxShadow: "0 6px 32px rgba(255, 255, 255, 0.3)",
+                }}
+                _active={{
+                  transform: "scale(0.98)",
+                }}
+                transition="all 0.2s ease"
+              >
+                Get started
+              </Button>
+
+              {/* Step indicators */}
+              <Box display="flex" gap={3} mt={10}>
+                <Box w={8} h={1.5} borderRadius="full" bg="white" />
+                <Box w={8} h={1.5} borderRadius="full" bg="whiteAlpha.300" />
+                <Box w={8} h={1.5} borderRadius="full" bg="whiteAlpha.300" />
+              </Box>
+            </MotionBox>
+          )}
+
           {/* Step 1: Rules */}
           {onboardingStep === 1 && (
             <MotionBox
@@ -185,6 +284,32 @@ function App() {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
             >
+              {/* Back button */}
+              <Box
+                position="absolute"
+                top={10}
+                left={5}
+                zIndex={10}
+              >
+                <Button
+                  onClick={() => setOnboardingStep(0)}
+                  variant="ghost"
+                  color="whiteAlpha.700"
+                  fontSize="sm"
+                  fontWeight="medium"
+                  px={0}
+                  _hover={{
+                    color: "white",
+                    bg: "transparent",
+                  }}
+                  _active={{
+                    bg: "transparent",
+                  }}
+                >
+                  Back
+                </Button>
+              </Box>
+
               {/* Decorative glow */}
               <Box
                 position="absolute"
@@ -253,24 +378,34 @@ function App() {
               </Text>
 
               {/* Instructions - two-tier hierarchy */}
-              <Box maxW="300px" mb={12}>
+              <Box maxW="300px" mb={10}>
                 <Text
-                  color="white"
-                  fontSize="md"
+                  color="whiteAlpha.700"
+                  fontSize="sm"
                   fontWeight="medium"
-                  mb={4}
+                  mb={5}
                   lineHeight="tall"
                 >
                   Vote for the moves you love as they happen.
                 </Text>
 
-                <Text
-                  color="whiteAlpha.500"
-                  fontSize="sm"
-                  lineHeight="tall"
+                <Box
+                  bg="rgba(168, 85, 247, 0.2)"
+                  border="1px solid"
+                  borderColor="rgba(168, 85, 247, 0.5)"
+                  borderRadius="xl"
+                  px={4}
+                  py={3}
                 >
-                  Pace yourself — run out early, and you can't vote for the other dancer if they start killing it.
-                </Text>
+                  <Text
+                    color="purple.200"
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    lineHeight="tall"
+                  >
+                    Pace yourself — run out early, and you can't vote for the other dancer if they start killing it.
+                  </Text>
+                </Box>
               </Box>
 
               {/* CTA Button */}
@@ -298,6 +433,7 @@ function App() {
 
               {/* Step indicators */}
               <Box display="flex" gap={3} mt={10}>
+                <Box w={8} h={1.5} borderRadius="full" bg="whiteAlpha.300" />
                 <Box w={8} h={1.5} borderRadius="full" bg="white" />
                 <Box w={8} h={1.5} borderRadius="full" bg="whiteAlpha.300" />
               </Box>
@@ -328,7 +464,7 @@ function App() {
                 left={0}
                 right={0}
                 bottom={0}
-                bg="linear-gradient(180deg, rgba(88, 28, 135, 0.6) 0%, rgba(0, 0, 0, 0.7) 40%, rgba(0, 0, 0, 0.8) 100%)"
+                bg="linear-gradient(180deg, rgba(88, 28, 135, 0.35) 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.4) 100%)"
                 zIndex={1}
                 pointerEvents="none"
               />
@@ -345,6 +481,32 @@ function App() {
                 pointerEvents="none"
                 zIndex={2}
               />
+
+              {/* Back button */}
+              <Box
+                position="absolute"
+                top={10}
+                left={5}
+                zIndex={100}
+              >
+                <Button
+                  onClick={() => setOnboardingStep(1)}
+                  variant="ghost"
+                  color="whiteAlpha.700"
+                  fontSize="sm"
+                  fontWeight="medium"
+                  px={0}
+                  _hover={{
+                    color: "white",
+                    bg: "transparent",
+                  }}
+                  _active={{
+                    bg: "transparent",
+                  }}
+                >
+                  Back
+                </Button>
+              </Box>
 
               {/* Practice success flash */}
               <AnimatePresence>
@@ -418,7 +580,7 @@ function App() {
                   color="whiteAlpha.600"
                   fontSize="sm"
                 >
-                  Point at a dancer, then tap the button
+                  Point at a dancer, then tap Vote
                 </Text>
               </Box>
 
@@ -534,6 +696,7 @@ function App() {
                 {/* Step indicators - matching page 1 */}
                 <Box display="flex" gap={3} mt={4}>
                   <Box w={8} h={1.5} borderRadius="full" bg="whiteAlpha.300" />
+                  <Box w={8} h={1.5} borderRadius="full" bg="whiteAlpha.300" />
                   <Box w={8} h={1.5} borderRadius="full" bg="white" />
                 </Box>
               </Box>
@@ -560,7 +723,7 @@ function App() {
         left={0}
         right={0}
         bottom={0}
-        bg="linear-gradient(180deg, rgba(88, 28, 135, 0.5) 0%, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.6) 100%)"
+        bg="linear-gradient(180deg, rgba(88, 28, 135, 0.3) 0%, rgba(0, 0, 0, 0.2) 30%, rgba(0, 0, 0, 0.35) 100%)"
         zIndex={1}
         pointerEvents="none"
       />
