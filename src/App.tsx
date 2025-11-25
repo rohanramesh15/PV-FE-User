@@ -9,9 +9,7 @@ declare global {
   }
 }
 
-const API_BASE_URL = "https://44b46f3c84f1.ngrok-free.app/api"
-//'https://pv-be-q7m9.onrender.com/api'
-//http://127.0.0.1:5000
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api'
 
 function App() {
   const [capturing, setCapturing] = useState(false);
